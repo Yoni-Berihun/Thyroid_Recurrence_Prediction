@@ -168,17 +168,17 @@ flowchart TD
     G --> H2 --> I
     G --> H3 --> I
     
-    style A fill:#e1f5ff
-    style B fill:#e1f5ff
-    style C fill:#f3e5f5
-    style D fill:#f3e5f5
-    style E fill:#e8f5e9
-    style F fill:#e8f5e9
-    style G fill:#fff3e0
-    style H1 fill:#ffe0b2
-    style H2 fill:#ffe0b2
-    style H3 fill:#ffe0b2
-    style I fill:#c8e6c9
+    style A fill:#e1f5ff,color:#000
+    style B fill:#e1f5ff,color:#000
+    style C fill:#f3e5f5,color:#000
+    style D fill:#f3e5f5,color:#000
+    style E fill:#e8f5e9,color:#000
+    style F fill:#e8f5e9,color:#000
+    style G fill:#fff3e0,color:#000
+    style H1 fill:#ffe0b2,color:#000
+    style H2 fill:#ffe0b2,color:#000
+    style H3 fill:#ffe0b2,color:#000
+    style I fill:#c8e6c9,color:#000
 ```
 
 ---
