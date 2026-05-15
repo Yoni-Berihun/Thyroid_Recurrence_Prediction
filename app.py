@@ -9,8 +9,6 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
-import joblib
-import os
 
 # Set page configuration
 st.set_page_config(
@@ -104,16 +102,16 @@ def get_feature_info():
     return {
         'Age': {'type': 'number', 'min': 0, 'max': 100, 'default': 45},
         'Gender': {'type': 'select', 'options': ['M', 'F']},
-        'Hx Radiotherapy': {'type': 'select', 'options': ['Yes', 'No']},
-        'Adenopathy': {'type': 'select', 'options': ['Yes', 'No']},
-        'Pathology': {'type': 'select', 'options': ['Papillary', 'Follicular', 'Medullary', 'Other']},
-        'Focality': {'type': 'select', 'options': ['Unifocal', 'Multifocal']},
+        'Hx Radiothreapy': {'type': 'select', 'options': ['Yes', 'No']},
+        'Adenopathy': {'type': 'select', 'options': ['Bilateral', 'Extensive', 'Left', 'No', 'Posterior', 'Right']},
+        'Pathology': {'type': 'select', 'options': ['Papillary', 'Follicular', 'Hurthel cell', 'Micropapillary']},
+        'Focality': {'type': 'select', 'options': ['Uni-Focal', 'Multi-Focal']},
         'Risk': {'type': 'select', 'options': ['Low', 'Intermediate', 'High']},
         'T': {'type': 'select', 'options': ['T1a', 'T1b', 'T2', 'T3a', 'T3b', 'T4a', 'T4b']},
         'N': {'type': 'select', 'options': ['N0', 'N1a', 'N1b']},
         'M': {'type': 'select', 'options': ['M0', 'M1']},
-        'Stage': {'type': 'select', 'options': ['I', 'II', 'III', 'IV']},
-        'Response': {'type': 'select', 'options': ['Excellent', 'Biochemical Incomplete', 'Structural Incomplete']}
+        'Stage': {'type': 'select', 'options': ['I', 'II', 'III', 'IVA', 'IVB']},
+        'Response': {'type': 'select', 'options': ['Excellent', 'Biochemical Incomplete', 'Indeterminate', 'Structural Incomplete']}
     }
 
 def main():
@@ -146,13 +144,14 @@ def main():
         
         with col2:
             st.markdown("### Medical History")
-            hx_radiotherapy = st.selectbox("History of Radiotherapy", ["Yes", "No"])
-            adenopathy = st.selectbox("Adenopathy", ["Yes", "No"])
+            hx_radiothreapy = st.selectbox("History of Radiotherapy", ["Yes", "No"])
+            adenopathy = st.selectbox("Adenopathy", ["Bilateral", "Extensive", "Left", "No", "Posterior", "Right"])
+            response = st.selectbox("Response", ["Excellent", "Biochemical Incomplete", "Indeterminate", "Structural Incomplete"])
         
         with col3:
             st.markdown("### Pathology")
-            pathology = st.selectbox("Pathology Type", ["Papillary", "Follicular", "Medullary", "Other"])
-            focality = st.selectbox("Focality", ["Unifocal", "Multifocal"])
+            pathology = st.selectbox("Pathology Type", ["Papillary", "Follicular", "Hurthel cell", "Micropapillary"])
+            focality = st.selectbox("Focality", ["Uni-Focal", "Multi-Focal"])
             risk = st.selectbox("Risk Level", ["Low", "Intermediate", "High"])
         
         st.markdown("### Staging")
@@ -165,16 +164,16 @@ def main():
         with col6:
             m_stage = st.selectbox("M Stage", ["M0", "M1"])
         with col7:
-            stage = st.selectbox("Stage", ["I", "II", "III", "IV"])
+            stage = st.selectbox("Stage", ["I", "II", "III", "IVA", "IVB"])
         
         st.markdown("---")
         # Prediction button
         if st.button("🔍 Predict Recurrence"):
-            # Create input dataframe (without Response)
+            # Create input dataframe (must match training column names)
             input_data = {
                 'Age': [age],
                 'Gender': [gender],
-                'Hx Radiotherapy': [hx_radiotherapy],
+                'Hx Radiothreapy': [hx_radiothreapy],
                 'Adenopathy': [adenopathy],
                 'Pathology': [pathology],
                 'Focality': [focality],
@@ -182,7 +181,8 @@ def main():
                 'T': [t_stage],
                 'N': [n_stage],
                 'M': [m_stage],
-                'Stage': [stage]
+                'Stage': [stage],
+                'Response': [response]
             }
             input_df = pd.DataFrame(input_data)
             # One-hot encode input
