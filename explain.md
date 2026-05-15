@@ -30,13 +30,41 @@ A **Streamlit** web app (`app.py`) provides a UI where a user enters patient att
 - **Data layer**: CSV is read from disk each time the app starts (then cached).
 
 ```mermaid
-flowchart LR
-    U[User / Clinician] -->|Inputs patient data| B[Browser]
-    B -->|HTTP| S[Streamlit server<br/>app.py]
-    S -->|read| D[(CSV dataset<br/>filtered_thyroid_data.csv)]
-    S -->|train (cached)| M[ML pipeline<br/>preprocess + models]
-    M -->|prediction + probas| S
+flowchart TB
+    subgraph Frontend["🌐 Frontend Layer"]
+        B["Browser<br/>(Streamlit UI)"]
+    end
+    
+    subgraph Backend["⚙️ Backend Layer"]
+        S["Streamlit Server<br/>(app.py)"]
+    end
+    
+    subgraph ML["🧠 ML Pipeline Layer"]
+        P["Preprocessing<br/>(encode, scale)"]
+        DT["Decision Tree"]
+        RF["Random Forest"]
+        KNN["KNN"]
+    end
+    
+    subgraph Data["💾 Data Layer"]
+        D["filtered_thyroid_data.csv"]
+    end
+    
+    User["👤 User / Clinician"]
+    
+    User -->|enters patient data| B
+    B -->|HTTP requests| S
+    S -->|reads| D
+    D -->|dataframe| S
+    S -->|triggers| P
+    P -->|features| DT
+    P -->|features| RF
+    P -->|features| KNN
+    DT -->|predictions| S
+    RF -->|predictions| S
+    KNN -->|predictions| S
     S -->|renders results| B
+    B -->|displays predictions| User
 ```
 
 **Key idea to say in a presentation:**
@@ -121,22 +149,36 @@ Why scaling?
 
 ```mermaid
 flowchart TD
-    A[Read CSV]
-    B[Impute missing values<br/>use mode]
-    C[Encode target Recurred<br/>No=0, Yes=1]
-    D[Split into X (features) and y (target)]
-    E[One hot encode categorical features]
-    F[Train test split<br/>80 percent train, 20 percent test]
-    G[Scale features<br/>StandardScaler fit on train]
-    H1[Train Decision Tree]
-    H2[Train Random Forest]
-    H3[Train KNN]
-    I[Trained models ready]
-
+    A["📥 Read CSV"] 
+    B["🧹 Impute Missing Values<br/>(mode)"]
+    C["🏷️ Encode Target Recurred<br/>(No=0, Yes=1)"]
+    D["🔀 Split X Features & y Target"]
+    E["🔢 One-Hot Encode<br/>Categorical Features"]
+    F["📊 Train/Test Split<br/>(80/20)"]
+    G["⚖️ Scale Features<br/>(StandardScaler on train)"]
+    
+    H1["🌳 Train Decision Tree"]
+    H2["🌲 Train Random Forest<br/>(n_estimators=100)"]
+    H3["📍 Train KNN<br/>(n_neighbors=5)"]
+    
+    I["✅ Models Trained & Ready"]
+    
     A --> B --> C --> D --> E --> F --> G
     G --> H1 --> I
     G --> H2 --> I
     G --> H3 --> I
+    
+    style A fill:#e1f5ff
+    style B fill:#e1f5ff
+    style C fill:#f3e5f5
+    style D fill:#f3e5f5
+    style E fill:#e8f5e9
+    style F fill:#e8f5e9
+    style G fill:#fff3e0
+    style H1 fill:#ffe0b2
+    style H2 fill:#ffe0b2
+    style H3 fill:#ffe0b2
+    style I fill:#c8e6c9
 ```
 
 ---
@@ -178,7 +220,7 @@ When the user clicks **Predict Recurrence**:
 5. Run `predict()` and `predict_proba()` for each model.
 6. Render:
    - Confidence metric
-   - A “Recurrence / No recurrence” box
+   - A "Recurrence / No recurrence" box
    - Bar chart for probability breakdown
 
 ---
@@ -211,7 +253,7 @@ sequenceDiagram
 
 ---
 
-## 9) How to present the “model comparison” story
+## 9) How to present the "model comparison" story
 A clean talk-track:
 
 - **Decision Tree**: simple, interpretable rules; often performs strongly on structured tabular data.
@@ -245,10 +287,10 @@ A: Models need numeric inputs; one-hot preserves categories without imposing fak
 A: Especially required for KNN because it uses distances; scaling prevents one feature (like Age) from dominating.
 
 **Q: What does `drop_first=True` do?**
-A: It sets one category as a baseline to avoid redundant columns; prediction still works because baseline is represented by “all zeros” for that feature’s dummy columns.
+A: It sets one category as a baseline to avoid redundant columns; prediction still works because baseline is represented by "all zeros" for that feature's dummy columns.
 
 **Q: Is training inside the app production-ready?**
-A: It’s perfect for a demo/prototype. In production you’d typically train offline, version the model, and load a saved artifact.
+A: It's perfect for a demo/prototype. In production you'd typically train offline, version the model, and load a saved artifact.
 
 ---
 
